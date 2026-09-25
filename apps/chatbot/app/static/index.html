@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <title>Simple AI Chatbot</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💬</text></svg>">
+  <link rel="stylesheet" href="styles.css">
+  <!-- Markdown rendering. If these fail to load, replies fall back to plain text. -->
+  <script defer crossorigin="anonymous"
+    src="https://cdn.jsdelivr.net/npm/marked@18.0.14/lib/marked.umd.js"
+    integrity="sha384-2vpGtuKqJvFlwJqYnf/wUMuzUfhUnYBt9oay0e2yaFcq0Dh6/aEbQ8YAOeKGzlYo"></script>
+  <script defer crossorigin="anonymous"
+    src="https://cdn.jsdelivr.net/npm/dompurify@3.4.16/dist/purify.min.js"
+    integrity="sha384-a7SzOxErzJ3ZpQz0zJ32d67dSitNzPcbfybc/ykU9KJhMgZkwqfSxlhhdJRS+XGL"></script>
+  <script defer src="app.js"></script>
+</head>
+<body>
+  <header class="app-header">
+    <div class="container header-inner">
+      <h1 class="app-title">Simple AI Chatbot</h1>
+      <button type="button" id="new-chat" class="button button-secondary">New chat</button>
+    </div>
+  </header>
+
+  <main id="messages" class="messages">
+    <div class="container">
+      <div id="empty-state" class="empty-state">
+        <p class="empty-title">How can I help?</p>
+        <p class="empty-subtitle">Ask a question, then follow up. The bot remembers the recent messages in this chat.</p>
+      </div>
+      <div id="message-list" class="message-list" role="log" aria-live="polite" aria-label="Conversation"></div>
+    </div>
+  </main>
+
+  <footer class="composer-bar">
+    <form id="composer" class="container composer" autocomplete="off">
+      <label for="message-input" class="visually-hidden">Message</label>
+      <textarea id="message-input" class="composer-input" rows="1" maxlength="4000"
+        placeholder="Send a message…" aria-describedby="composer-hint"></textarea>
+      <button type="submit" id="send-button" class="button button-primary" disabled>Send</button>
+    </form>
+    <p id="composer-hint" class="container composer-hint">Enter to send · Shift+Enter for a new line</p>
+  </footer>
+
+  <noscript><p class="container">This chat needs JavaScript enabled.</p></noscript>
+</body>
+</html>

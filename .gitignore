@@ -148,7 +148,10 @@ activemq-data/
 *.sage.py
 
 # Environments
+# .env holds your API key, so never commit it. .env.example is the safe template.
 .env
+.env.*
+!.env.example
 .envrc
 .venv
 env/
@@ -216,3 +219,6 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# macOS Finder files
+.DS_Store
