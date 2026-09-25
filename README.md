@@ -6,6 +6,8 @@ A small chatbot web app that is easy to read and run: a FastAPI backend, a one-n
 - Follow-up questions work: LangGraph's built-in `InMemorySaver` keeps each conversation in server memory, with no database.
 - When something goes wrong, users see a short, friendly message and the details go to the server log.
 
+It has no guardrails against prompt injection, no tool calling and only minimal memory. Read [Limitations](#limitations) before putting it anywhere public.
+
 ## How to run
 
 ### 1. Install
@@ -124,6 +126,46 @@ With that ID, LangGraph loads the conversation's saved messages before the `chat
 - **There's no login.** Anyone who knows a `thread_id` can continue that conversation. Put the app behind your own authentication before exposing it publicly.
 
 To keep conversations across restarts or share them between servers, LangGraph has database-backed checkpointers (for example `langgraph-checkpoint-sqlite` or `langgraph-checkpoint-postgres`) that take `InMemorySaver`'s place. Those, along with long-term memory and monitoring, are out of scope for this project.
+
+## Limitations
+
+This is a small learning project. The model is called directly, with no safety layer around it, and the app isn't ready to face the public internet as it is. These are left out on purpose to keep the code small.
+
+### No guardrails against prompt injection
+
+Your message goes to the model exactly as you typed it. The only checks are in `schemas.py`: 1–4000 characters, not blank. Nothing filters what goes in or checks what comes out.
+
+- **The system prompt is only a request.** It's plain text sent in front of the conversation, and a message like "Ignore your previous instructions and…" can talk the model out of it. Jailbreaks work as well as the model lets them.
+- **The system prompt isn't secret.** Users can ask the model to repeat it, so don't put keys, internal URLs or anything private in `SYSTEM_PROMPT`.
+- **Injected instructions stick around.** A message stays in the thread and is resent with the next few questions, until it falls out of the last-7 window.
+- **No content moderation.** Nothing checks messages or replies for harmful, offensive or off-topic content. What the model refuses depends only on its own safety training.
+- **Replies aren't fact-checked.** The model can make things up and state them confidently.
+
+DOMPurify in the browser only stops a reply from running scripts or loading images on the chat page. It protects the page (XSS), not the model.
+
+For now the risk is limited. The app reads no web pages, files or documents, so the only way in is a user's own message, and the model has no tools or private data, so the worst it can do is write text. That changes as soon as you add tools, retrieval over your documents or user data: add guardrails first.
+
+### No tool calling
+
+The graph has one node that sends the conversation to the model and saves its text reply. The model isn't given any tools (no `bind_tools`, no `ToolNode`), so it can't search the web, read files, call APIs or run code. Everything it says comes from its training data: answers about recent events or anything after the model's training cutoff can be out of date or wrong, and it can't look anything up to check.
+
+### No memory management
+
+Chat memory is the bare minimum: a fixed window over one conversation, kept in RAM. [Memory limitations](#memory-limitations) has the details. In short:
+
+- **Older messages are dropped, not summarized.** Anything before the last 7 messages is gone as far as the model is concerned.
+- **The window counts messages, not tokens.** Seven long messages cost far more tokens than seven short ones. With the defaults this stays small, but a much larger `MAX_HISTORY_MESSAGES` can run past the model's context window.
+- **No long-term memory.** Nothing carries over between conversations, so every new chat starts knowing nothing about you.
+- **No cleanup.** Conversations are never deleted or expired while the server runs, and a restart wipes them all.
+
+### Other things that aren't there
+
+- **No login and no rate limiting.** Anyone who can reach the server can chat as much as they like on your Groq API key, and can continue any conversation whose `thread_id` they know. `CORS_ORIGINS` only restricts browsers, not `curl` or scripts.
+- **No handling of personal data.** Every message is sent to Groq and kept in server memory as typed. Nothing detects or removes personal information.
+- **No monitoring or evaluation.** There's no tracing, metrics or quality checks on replies, only the server log.
+- **One model, no fallback.** If Groq is down or rate-limited, the user gets an error message and has to try again.
+
+Before deploying it anywhere public, put it behind authentication and rate limiting at the very least, and add input and output guardrails before giving the model tools or access to data.
 
 ## Project layout
 

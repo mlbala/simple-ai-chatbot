@@ -109,3 +109,4 @@ The tests replace Groq with a fake chat model based on `GenericFakeChatModel`, s
 
 - The UI loads `marked` and `DOMPurify` from jsDelivr, pinned to exact versions with integrity hashes, to render Markdown. Only formatting tags are allowed, not images or raw HTML. If the libraries don't load, replies show as plain text.
 - Conversations live only in the server's memory. See [Memory limitations](../../README.md#memory-limitations) for what that means.
+- There are no prompt-injection guardrails, tools, login or rate limiting. See [Limitations](../../README.md#limitations).
